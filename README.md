@@ -57,7 +57,7 @@ NOTE: if you change your webroot directory you need to redo this step.
 
 ## create a service file for TLSWebServer
 
-Edit the follwoing content to your needs and save it under your systemd service directory, usually _/etc/systemd/system/_ as tlswebserver.service.
+Edit the follwoing content to your needs and save it under your systemd service directory - usually _/etc/systemd/system/_ - as _tlswebserver.service_.
 Make sure it is executable. HINT: ```chmod 755 /etc/systemd/system/tlswebserver.service```
 
 ```
@@ -74,5 +74,18 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 ```
+After that you should be able to start and stop your tlswebserver like this:
 
+```
+sudo service tlswebserver start
+```
 
+```
+sudo service tlswebserver stop
+```
+
+You can also seee the current status with:
+
+```
+sudo service tlswebserver status
+```
