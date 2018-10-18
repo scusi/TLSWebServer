@@ -13,15 +13,27 @@ var key string
 var staticDir string
 
 func init() {
-	flag.StringVar(&httpAddr, "http", ":80", "http listen address")
+	flag.StringVar(&httpAddr, "http", "", "http to https redirector listen address")
 	flag.StringVar(&httpsAddr, "https", ":443", "https listen address")
 	flag.StringVar(&cert, "cert", "./tls/cert.pem", "tls certificate PEM file")
 	flag.StringVar(&key, "key", "./tls/key.pem", "tls key PEM file")
-	flag.StringVar(&staticDir, "staticDir", "./ui/static", "directory with static webcontent")
+	flag.StringVar(&staticDir, "staticDir", "", "directory with static webcontent")
 }
 
 func main() {
 	flag.Parse()
+
+	if staticDir == "" {
+		log.Fatal("no staticDir given but required")
+	}
+
+	if cert == "" {
+		log.Fatal("no certificate file given, but required")
+	}
+
+	if key == "" {
+		log.Fatal("no key file given but required")
+	}
 
 	app := &App{
 		Addr:      httpsAddr,
@@ -31,13 +43,15 @@ func main() {
 	}
 
 	// start a http server on httpAddr that just redirects to https
-	go func() {
-		httpMux := http.NewServeMux()
-		httpMux.HandleFunc("/", app.TLSRedirect)
-		log.Println("Starting http server on ", httpAddr)
-		err := http.ListenAndServe(httpAddr, httpMux)
-		log.Fatal(err)
-	}()
+	if httpAddr != "" {
+		go func() {
+			httpMux := http.NewServeMux()
+			httpMux.HandleFunc("/", app.TLSRedirect)
+			log.Println("Starting http server on ", httpAddr)
+			err := http.ListenAndServe(httpAddr, httpMux)
+			log.Fatal(err)
+		}()
+	}
 
 	// start a https server on httpsAddr
 	app.RunTLSServer()
