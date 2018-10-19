@@ -39,7 +39,6 @@ NOTE: if you change your webroot directory you need to redo this step.
 
 TODO: describe how to use the webserver restart command properly.
 
-
 ### Manually force TLSWebServer to reload it's certificate and key
 
 In case you want manually to force your TLSWebServer process to reload the 
@@ -61,6 +60,14 @@ Send a HUP signal to that PID, in order to force reloading certificate and key.
 ```
 kill -s HUP 14169
 ```
+
+There is also a small command shipping with TLSWebServer that does Step 1 and Step 2 for you.
+Just start it without any arguments, like in the example below.
+```
+$ ./reloadCerts
+2018/10/19 21:37:57 found a 'TLSWebServer' process, PID = 2694
+2018/10/19 21:37:57 sent HUP signal to PID: 2694
+```
 #### Verification
 
 Your TLSWebServer process will output a line similar to the following one, on standard error (stderr):
@@ -68,4 +75,11 @@ Your TLSWebServer process will output a line similar to the following one, on st
 2018/10/19 12:15:43 Received SIGHUP, reloading TLS certificate and key from "./tls/cert.pem" and "./tls/key.pem"
 ```
 
-When you connect to your TLSWebServer process with a browser you should get the new certificate.
+When you connect to your TLSWebServer process with a browser you should get 
+the new certificate.
+You can also do it from the commandline, like this:
+```
+openssl s_client -connect localhost:8443 < /dev/null 2>/dev/null | openssl x509 -fingerprint -noout -in /dev/stdin
+```
+In the above example you have to adjust your hostname and port (localhost:8443) 
+to your needs.
