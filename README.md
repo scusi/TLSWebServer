@@ -5,8 +5,8 @@ A very simple TLS webserver written in golang.
 ## Features
 
 - Secure TLS settings, by default
- - TLSv1.2 only
- - uses only strong ciphers with forward secrecy
+  - TLSv1.2 only
+  - uses only strong ciphers with forward secrecy
 - redirects http requests to https
 - protection against slowloris kind of attacks
 - can reload certificates on the fly, no downtime
