@@ -20,7 +20,7 @@ How to do this depends on your setup, please find out yourself.
 ### create a selfsigned certificate
 
 Before you can start a TLSWebServer you need a certificate. In the following you learn how to create a selfsigned certificate, to get started.
-For productive use a certificate signed by a acknowledged root CA will be more suitable. Please see [AutomaticCertRenewal.md] document how you can archive that.
+For productive use a certificate signed by a acknowledged root CA will be more suitable. Please see [AutomaticCertRenewal.md](AutomaticCertRenewal.md) document how you can archive that.
 
 ```
 mkdir -p tls
