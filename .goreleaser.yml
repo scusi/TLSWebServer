@@ -27,6 +27,7 @@ archive:
       format: zip
   files:
     - README.md
+    - AutomaticCertRenewal.md
 checksum:
   name_template: 'checksums.txt'
 snapshot:

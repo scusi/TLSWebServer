@@ -8,38 +8,24 @@ A very simple TLS webserver written in golang.
 - redirects http requests to https
 - protection against sloworis kind of attacks
 - fast and well scaleing
+- can reload certificates on the fly, no downtime
 
 ## Getting started
-
-### Install acme.sh
-
-I recommend acme.sh as a tool to create and renew TLS certificates wirh _Let's encrypt_.
-
-Install acme.sh on the same machine you want to run TLSWebServer like this:
-```
-curl https://get.acme.sh | sh
-```
 
 ### make sure DNS records point to your IP
 
 Time to make sure that the DNS A record for your host is pointting to the IP where you want to run TLSWebServer.
 How to do this depends on your setup, please find out yourself.
 
-
 ### create a selfsigned certificate
+
+Before you can start a TLSWebServer you need a certificate. In the following you learn how to create a selfsigned certificate, to get started.
+For productive use a certificate signed by a acknowledged root CA will be more suitable. Please see [AutomaticCertRenewal.md] document how you can archive that.
 
 ```
 mkdir -p tls
 cd tls
 go run $GOROOT/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
-```
-
-### Get a TLS certificate
-
-Issue an initial certificate for _example.com_
-
-```
-acme.sh --issue -d example.com --standalone
 ```
 
 ### Start TLSWebserver
@@ -53,17 +39,6 @@ The above command will:
   `/usr/var/www` and useing the given cert anf key for TLS.
 
 Note: If the _-http_ flag is omitted no http server will be started.
-
-### Renew Your Certificate - once manual
-
-In order to make sure that acme.sh knows where your webroot is for all future renewals,
-once renew your certificate with the `-w` flag and your webroot directory.
-
-```
-acme.sh --renew -d example.com -w /usr/var/www
-```
-
-NOTE: if you change your webroot directory you need to redo this step.
 
 ## Create a service file for TLSWebServer
 

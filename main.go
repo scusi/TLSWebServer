@@ -8,15 +8,15 @@ import (
 
 var httpAddr string
 var httpsAddr string
-var cert string
-var key string
+var tlsCertPath string
+var tlsKeyPath string
 var staticDir string
 
 func init() {
 	flag.StringVar(&httpAddr, "http", "", "http to https redirector listen address")
 	flag.StringVar(&httpsAddr, "https", ":443", "https listen address")
-	flag.StringVar(&cert, "cert", "./tls/cert.pem", "tls certificate PEM file")
-	flag.StringVar(&key, "key", "./tls/key.pem", "tls key PEM file")
+	flag.StringVar(&tlsCertPath, "cert", "./tls/cert.pem", "tls certificate PEM file")
+	flag.StringVar(&tlsKeyPath, "key", "./tls/key.pem", "tls key PEM file")
 	flag.StringVar(&staticDir, "staticDir", "", "directory with static webcontent")
 }
 
@@ -27,19 +27,19 @@ func main() {
 		log.Fatal("no staticDir given but required")
 	}
 
-	if cert == "" {
+	if tlsCertPath == "" {
 		log.Fatal("no certificate file given, but required")
 	}
 
-	if key == "" {
+	if tlsKeyPath == "" {
 		log.Fatal("no key file given but required")
 	}
 
 	app := &App{
 		Addr:      httpsAddr,
 		StaticDir: staticDir,
-		TLSCert:   cert,
-		TLSKey:    key,
+		TLSCert:   tlsCertPath,
+		TLSKey:    tlsKeyPath,
 	}
 
 	// start a http server on httpAddr that just redirects to https

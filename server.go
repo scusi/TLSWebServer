@@ -39,7 +39,13 @@ func (app *App) RunTLSServer() {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	kpr, err := NewKeypairReloader(tlsCertPath, tlsKeyPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	srv.TLSConfig.GetCertificate = kpr.GetCertificateFunc()
+
 	log.Printf("Starting server on %s", app.Addr)
-	err := srv.ListenAndServeTLS(app.TLSCert, app.TLSKey)
+	err = srv.ListenAndServeTLS("", "")
 	log.Fatal(err)
 }
