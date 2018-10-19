@@ -5,9 +5,10 @@ A very simple TLS webserver written in golang.
 ## Features
 
 - Secure TLS settings, by default
+ - TLSv1.2 only
+ - uses only strong ciphers with forward secrecy
 - redirects http requests to https
-- protection against sloworis kind of attacks
-- fast and well scaleing
+- protection against slowloris kind of attacks
 - can reload certificates on the fly, no downtime
 
 ## Getting started
@@ -96,6 +97,9 @@ You can also seee the current status with:
 sudo service tlswebserver status
 ```
 
-## The follwoing sites use TLSWebServer
+## The following websites known to use TLSWebServer
+
+If you want to be listed here contact me.
 
 - [scusiblog.org](https://scusiblog.org)
+
