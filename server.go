@@ -39,7 +39,7 @@ func (app *App) RunTLSServer() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	kpr, err := NewKeypairReloader(tlsCertPath, tlsKeyPath)
+	kpr, err := NewKeypairReloader(cfg.TLSCertPath, cfg.TLSKeyPath)
 	if err != nil {
 		log.Fatal(err)
 	}

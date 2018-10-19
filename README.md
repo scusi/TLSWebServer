@@ -41,16 +41,31 @@ This needs to be redone when the binary was updated.
 
 Otherwise you have to run TLSWebServer with root privileges or use non default ports above 1024, like 8080 (HTTP-ALT) and 8443 (HTTPS-ALT).
 
+### Prepare a TLSWebserver config file
+
+Create a file called _config.yml_ with a content like in the following listing.
+
+```
+HttpAddr: 127.0.0.1:8080
+HttpsAddr: 127.0.0.1:8443
+TLSCertPath: tls/cert.pem
+TLSKeyPath: tls/key.pem
+StaticDir: /home/analyzr/sources/octopress_0x41414141/public
+```
+
 ### Start TLSWebserver
-```TLSWebServer -http=:80 -https=:443 -staticDir=/usr/var/www -cert=/home/you/.acme.sh/example.com/fullchain.cer -key=/home/you/.acme.sh/example.com/example.com.key```
 
-The above command will:
-- start a http server, that just redirects every request to https on port 80
-  on all interfaces.
-- start a https server on port 443 on all interfaces, serving files from
-  `/usr/var/www` and useing the given cert anf key for TLS.
+You can start a TLSWebServer now with your config, like this:
 
-Note: If the _-http_ flag is omitted no http server will be started.
+```TLSWebServer -conf /path/to/your/config.yml```
+
+Note: If the _-conf_ flag is omitted TLSWebServer will search for a config file in the following loctions:
+- /etc/TLSWebServer/config.yml
+- /usr/local/etc/TLSWebServer/config.yml
+- ~/.config/TLSWebServer/config.yml
+- ./config.yaml 
+
+If no config file could be found on the above default locations and there was none given on the command line it will use a default configuration.
 
 ### Create a service file for TLSWebServer
 
