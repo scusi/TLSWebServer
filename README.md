@@ -50,7 +50,7 @@ HttpAddr: 127.0.0.1:8080
 HttpsAddr: 127.0.0.1:8443
 TLSCertPath: tls/cert.pem
 TLSKeyPath: tls/key.pem
-StaticDir: /home/analyzr/sources/octopress_0x41414141/public
+StaticDir: /path/to/your/webroot
 ```
 
 ### Start TLSWebserver
