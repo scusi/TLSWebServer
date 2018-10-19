@@ -28,8 +28,19 @@ cd tls
 go run $GOROOT/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
 ```
 
-### Start TLSWebserver
+### Allow TLSWebServer to bind to privileged ports
+When you want to use the default ports for HTTP (port 80) and HTTPS (port 443) 
+on most unice operating systems you need to have root privileges. In order to 
+avoid that - on linux - you can do:
+```
+sudo setcap cap_net_bind_service=ep /path/to/TLSWebServer
+```
+This will allow your TLSWebServer binary to bind to ports below 1024.
+This needs to be redone when the binary was updated.
 
+Otherwise you have to run TLSWebServer with root privileges or use non default ports above 1024, like 8080 (HTTP-ALT) and 8443 (HTTPS-ALT).
+
+### Start TLSWebserver
 ```TLSWebServer -http=:80 -https=:443 -staticDir=/usr/var/www -cert=/home/you/.acme.sh/example.com/fullchain.cer -key=/home/you/.acme.sh/example.com/example.com.key```
 
 The above command will:
@@ -40,7 +51,7 @@ The above command will:
 
 Note: If the _-http_ flag is omitted no http server will be started.
 
-## Create a service file for TLSWebServer
+### Create a service file for TLSWebServer
 
 Edit the follwoing content to your needs and save it under your systemd service directory as `tlswebserver.service`. The systemd directory on most linux systems is usually `/etc/systemd/system/`.
 
