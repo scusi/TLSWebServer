@@ -1,84 +1,136 @@
+// example TLS webserver that supports multiple domains
 package main
 
 import (
+	"crypto/tls"
+	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"os/user"
-	"path/filepath"
+	"time"
 )
 
-/*
-var httpAddr string
-var httpsAddr string
-var tlsCertPath string
-var tlsKeyPath string
-var staticDir string
-*/
-var usr *user.User
-var ConfigFilePath string
-var ConfigFileLocations []string
-var cfg *Config
-var err error
+type TLSHost struct {
+	Hostname    string
+	TLSCertPath string
+	TLSKeyPath  string
+	Webroot     string
+}
+
+type Config struct {
+	ListenAddr string
+	TLSHosts   []TLSHost
+}
+
+var configFile string
 
 func init() {
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal("Can not determine current user: ", err)
-	}
-	ConfigFileLocations = []string{
-		"/etc/TLSWebserver/config.yml",
-		"/usr/local/etc/TLSWebServer/config.yml",
-		filepath.Join(usr.HomeDir, ".config/TLSWebServer/config.yml"),
-		"./config.yml",
-	}
-	cfg = NewConfig("")
+	flag.StringVar(&configFile, "conf", "./config", "config file to load")
+}
 
-	flag.StringVar(&ConfigFilePath, "conf", "./config.yml", "path to config file")
-	//flag.StringVar(&cfg.HttpAddr, "http", "", "http to https redirector listen address")
-	//flag.StringVar(&cfg.HttpsAddr, "https", ":443", "https listen address")
-	//flag.StringVar(&cfg.TLSCertPath, "cert", "./tls/cert.pem", "tls certificate PEM file")
-	//flag.StringVar(&cfg.TLSKeyPath, "key", "./tls/key.pem", "tls key PEM file")
-	//flag.StringVar(&cfg.StaticDir, "staticDir", "", "directory with static webcontent")
+func WriteConfig(filename string, conf Config) (err error) {
+	jBytes, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		return
+	}
+	err = ioutil.WriteFile("config.json", jBytes, 0700)
+	if err != nil {
+		return
+	}
+	log.Printf("config written to: %s\n", "config.json")
+	return
+}
+
+func ReadConfig(filename string) (conf Config, err error) {
+	cfg := &Config{}
+	jBytes, err := ioutil.ReadFile("config.json")
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(jBytes, cfg)
+	if err != nil {
+		return
+	}
+	return *cfg, nil
+}
+
+func LogRequest(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		pattern := `%s - "%s %s %s %s"`
+		log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
+
+		next.ServeHTTP(w, r)
+	}
+
+	return http.HandlerFunc(fn)
 }
 
 func main() {
 	flag.Parse()
-	if ConfigFilePath != "" {
-		cfg = NewConfig(ConfigFilePath)
+	t := log.Logger{}
+	var err error
+	//conf, err := config.ReadConfigFile(configFile)
+	conf, err := ReadConfig("config.json")
+	if err != nil {
+		log.Fatal(err)
 	}
-	log.Printf("config:\n%+v\n", cfg)
-	if cfg.StaticDir == "" {
-		log.Fatal("no staticDir given but required")
+	//log.Printf("ReadConf:\n%+v\n", conf)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	//log.Printf("read conf:\n%+v\n", conf)
+	// setup routing for the TLSHosts
+	mux := http.NewServeMux()
+	for _, host := range conf.TLSHosts {
+		mux.Handle(host.Hostname+"/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
 	}
 
-	if cfg.TLSCertPath == "" {
-		log.Fatal("no certificate file given, but required")
+	// setup a TLS server
+	tlsConfig := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		MaxVersion:               tls.VersionTLS12,
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA,
+			tls.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+			tls.TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+		},
 	}
-
-	if cfg.TLSKeyPath == "" {
-		log.Fatal("no key file given but required")
+	tlsConfig.Certificates = make([]tls.Certificate, len(conf.TLSHosts))
+	// go http server treats the 0'th key as a default fallback key
+	for i, host := range conf.TLSHosts {
+		//log.Printf("host:\n%+v\n", host)
+		tlsConfig.Certificates[i], err = tls.LoadX509KeyPair(host.TLSCertPath, host.TLSKeyPath)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
+	tlsConfig.BuildNameToCertificate()
 
-	app := &App{
-		Addr:      cfg.HttpsAddr,
-		StaticDir: cfg.StaticDir,
-		TLSCert:   cfg.TLSCertPath,
-		TLSKey:    cfg.TLSKeyPath,
+	server := &http.Server{
+		IdleTimeout:    time.Minute,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+		TLSConfig:      tlsConfig,
+		Handler:        mux,
 	}
+	listener, err := tls.Listen("tcp", conf.ListenAddr, tlsConfig)
+	if err != nil {
+		t.Fatal(err)
 
-	// start a http server on httpAddr that just redirects to https
-	if cfg.HttpAddr != "" {
-		log.Printf("Starting a HTTP redirector\n")
-		go func() {
-			httpMux := http.NewServeMux()
-			httpMux.HandleFunc("/", app.TLSRedirect)
-			log.Println("Starting http server on ", cfg.HttpAddr)
-			err := http.ListenAndServe(cfg.HttpAddr, httpMux)
-			log.Fatal(err)
-		}()
 	}
-
-	// start a https server on httpsAddr
-	app.RunTLSServer()
+	log.Fatal(server.Serve(listener))
 }
