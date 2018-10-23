@@ -14,30 +14,37 @@ curl https://get.acme.sh | sh
 ### Get a TLS certificate
 
 Please note the following conditions:
-- make sure TLSWebServer is not running yet.
+- make sure TLSWebServer is running.
 - you need to be on a host reachable from the internet on port 80 and 443.
   On a internet server this should be no problem, if not firewalled.
   On a home network behind NAT you need to configure port forwardings in your router first.
 - your domain names DNS A record has to point to the IP of your host.
 
-Issue an initial certificate for _example.com_
+Issue an initial certificate for your domain.
+Exchange _scusiblog.org_ with your domain in all following examples.
 
 ```
-acme.sh --issue -d example.com --standalone
+acme.sh --issue -d scusiblog.org -w /home/jupp/tlsWeb/www
 ```
 
-### Renew Your Certificate - once manual
-
-In order to make sure that acme.sh knows where your webroot is for all future renewals,
-once renew your certificate with the `-w` flag and your webroot directory.
+### Install your certificate
 
 ```
-acme.sh --renew -d example.com -w /usr/var/www
+acme.sh --install-cert -d scusiblog.org \
+ --key-file /home/jupp/testWeb/tls/key.pem \
+ --fullchain-file /home/jupp/testWeb/tls/cert.pem \
+ --reloadcmd "sudo service tlswebserver force-reload"
 ```
 
-NOTE: if you change your webroot directory you need to redo this step.
+After this your certificates will be renewed automattically by acme.sh.
+Cool, isn't it?
 
-TODO: describe how to use the webserver restart command properly.
+### Renew Your Certificate - forcefully
+
+If you ever need to renew your certifcate before automatic renewal, you can do:
+```
+acme.sh --renew -d scusiblog.org -w /home/jupp/tlsWeb/www/ --force
+```
 
 ### Manually force TLSWebServer to reload it's certificate and key
 
