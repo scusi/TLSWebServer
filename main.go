@@ -55,6 +55,7 @@ func main() {
 	r := mux.NewRouter()
 	for _, host := range conf.TLSHosts {
 		s := r.Host(host.Hostname).Subrouter()
+		s.HandleFunc("/server-status/", Stats)
 		s.Handle("/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
 	}
 
@@ -141,4 +142,8 @@ func LogRequest(next http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(fn)
+}
+
+func Stats(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Statspage goes here\n"))
 }
