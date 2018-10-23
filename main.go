@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"flag"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -26,44 +27,7 @@ type Config struct {
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "conf", "./config", "config file to load")
-}
-
-func WriteConfig(filename string, conf Config) (err error) {
-	jBytes, err := json.MarshalIndent(conf, "", "  ")
-	if err != nil {
-		return
-	}
-	err = ioutil.WriteFile("config.json", jBytes, 0700)
-	if err != nil {
-		return
-	}
-	log.Printf("config written to: %s\n", "config.json")
-	return
-}
-
-func ReadConfig(filename string) (conf Config, err error) {
-	cfg := &Config{}
-	jBytes, err := ioutil.ReadFile("config.json")
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(jBytes, cfg)
-	if err != nil {
-		return
-	}
-	return *cfg, nil
-}
-
-func LogRequest(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		pattern := `%s - "%s %s %s %s"`
-		log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
-
-		next.ServeHTTP(w, r)
-	}
-
-	return http.HandlerFunc(fn)
+	flag.StringVar(&configFile, "conf", "./config.json", "config file to load")
 }
 
 func main() {
@@ -82,9 +46,16 @@ func main() {
 	}
 	//log.Printf("read conf:\n%+v\n", conf)
 	// setup routing for the TLSHosts
-	mux := http.NewServeMux()
+	/*
+		mux := http.NewServeMux()
+		for _, host := range conf.TLSHosts {
+			mux.Handle(host.Hostname+"/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
+		}
+	*/
+	r := mux.NewRouter()
 	for _, host := range conf.TLSHosts {
-		mux.Handle(host.Hostname+"/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
+		s := r.Host(host.Hostname).Subrouter()
+		s.Handle("/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
 	}
 
 	// setup a TLS server
@@ -125,7 +96,7 @@ func main() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 		TLSConfig:      tlsConfig,
-		Handler:        mux,
+		Handler:        r,
 	}
 	listener, err := tls.Listen("tcp", conf.ListenAddr, tlsConfig)
 	if err != nil {
@@ -133,4 +104,41 @@ func main() {
 
 	}
 	log.Fatal(server.Serve(listener))
+}
+
+func WriteConfig(filename string, conf Config) (err error) {
+	jBytes, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		return
+	}
+	err = ioutil.WriteFile("config.json", jBytes, 0700)
+	if err != nil {
+		return
+	}
+	log.Printf("config written to: %s\n", "config.json")
+	return
+}
+
+func ReadConfig(filename string) (conf Config, err error) {
+	cfg := &Config{}
+	jBytes, err := ioutil.ReadFile("config.json")
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(jBytes, cfg)
+	if err != nil {
+		return
+	}
+	return *cfg, nil
+}
+
+func LogRequest(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		pattern := `%s - "%s %s %s %s"`
+		log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
+
+		next.ServeHTTP(w, r)
+	}
+
+	return http.HandlerFunc(fn)
 }
