@@ -14,6 +14,15 @@ The configuration file is located in _/etc/TLSWebServer/config.json_.
 You can edit that file to your needs. 
 Please take care that you end up with a valid JSON file.
 
+Basically there are just two sections.
+
+- `ListenAddr` is the IP:Port combination TLSWebServer should listen for incoming connections.
+- `TLSHosts` is a list of hostnames TLSWebServer serves.
+   For each TLSHost you need to configure:
+   - a `Hostname`
+   - a path to the TLS certificate and key
+   - a directory where the content is you want to serve under the given hostname.
+
 ### add another host to your config
 
 If you want to add another hostname to your config, simply clone the TLSHosts section 
