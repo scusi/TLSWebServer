@@ -5,11 +5,18 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
+)
+
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
 )
 
 type TLSHost struct {
@@ -27,7 +34,7 @@ type Config struct {
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "conf", "./config.json", "config file to load")
+	flag.StringVar(&configFile, "conf", "/etc/TLSWebServer/config.json", "config file to load")
 }
 
 func main() {
@@ -35,7 +42,7 @@ func main() {
 	t := log.Logger{}
 	var err error
 	//conf, err := config.ReadConfigFile(configFile)
-	conf, err := ReadConfig("config.json")
+	conf, err := ReadConfig(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,7 +62,7 @@ func main() {
 	r := mux.NewRouter()
 	for _, host := range conf.TLSHosts {
 		s := r.Host(host.Hostname).Subrouter()
-		s.HandleFunc("/server-status/", Stats)
+		s.HandleFunc("/server-version/", Version)
 		s.Handle("/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
 	}
 
@@ -122,7 +129,7 @@ func WriteConfig(filename string, conf Config) (err error) {
 
 func ReadConfig(filename string) (conf Config, err error) {
 	cfg := &Config{}
-	jBytes, err := ioutil.ReadFile("config.json")
+	jBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return
 	}
@@ -144,6 +151,6 @@ func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-func Stats(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Statspage goes here\n"))
+func Version(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "TLSWebServer (multiDomain)\nVersion: %v,\nCommit %v,\nbuilt at %v\n", version, commit, date)
 }

@@ -1,0 +1,12 @@
+[Unit]
+Description=tlswebserver
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/TLSWebServer -conf /etc/TLSWebServer/config.json
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

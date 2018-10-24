@@ -1,0 +1,11 @@
+{
+  "ListenAddr": ":8443",
+  "TLSHosts": [
+    {
+      "Hostname": "localhost",
+      "TLSCertPath": "/var/TLSWebServer/localhost/tls/cert.pem",
+      "TLSKeyPath": "/var/TLSWebServer/localhost/tls/key.pem",
+      "Webroot": "/var/TLSWebServer/localhost/www/"
+    }
+  ]
+}

@@ -1,68 +1,42 @@
 # TLSWebServer with multiple domain support
 
-This is a proof of concept TLSWebserver that supports multiple domains with it's own certificate each.
-This variant of TLSWebServer does not support reloading certificates on the fly. You have to restart the server as a whole.
+## Install
 
-## Config file
-save the following listing as _config.json_ in the local directory
+### Install the .deb package
+
+The easiest way to install TLSWebserver is to use the released .deb or .rpm package.
+You can find the packages in the [dist](dist/) folder.
+Please choose a package that corresponds to your architecture and operating system.
+
+## Configure TLSWebServer
+
+The configuration file is located in _/etc/TLSWebServer/config.json_.
+You can edit that file to your needs. Please take care that you end up with a valif JSON file.
+
+## Certificates
+
+Certificates and corresponding key are based in _/var/TLSWebServer/{hostname}/tls/_.
+Where _{hostname}_ is your configured hostname, e.g. _localhost_.
+
+During Setup a self signed certificate for localhost will be generated and moved into the approriate location.
+
+## Starting and Stoping TLSWebServer
+
+During Install a systemd service file was installed unter _/etc/systemd/system/tlswebserver.service_.
+Hence you can start your TLSWebServer like any other installed service.
+
+To start TLSWebServer use:
 ```
-{
-  "ListenAddr": ":8443",
-  "TLSHosts": [
-    {
-      "Hostname": "localhost",
-      "TLSCertPath": "localhost/tls/cert.pem",
-      "TLSKeyPath": "localhost/tls/key.pem",
-      "Webroot": "localhost/www/"
-    },
-    {
-      "Hostname": "test1.test",
-      "TLSCertPath": "test1/tls/cert.pem",
-      "TLSKeyPath": "test1/tls/key.pem",
-      "Webroot": "test1/www"
-    },
-    {
-      "Hostname": "test2.test",
-      "TLSCertPath": "test2/tls/cert.pem",
-      "TLSKeyPath": "test2/tls/key.pem",
-      "Webroot": "test2/www"
-    }
-  ]
-}
-
-```
-## Setup
-```
-// create directory structure
-mkdir -p localhost/tls localhost/www
-mkdir -p test1/tls test1/www
-mkdir -p test2/tls test2/www
-
-// create certificates
-cd localhost/tls && go run $GOROOT/src/crypto/tls/generate_cert.go -rsa-bits 4096 -host localhost && cd ../../
-cd test1/tls && go run $GOROOT/src/crypto/tls/generate_cert.go -rsa-bits 4096 -host test1.test && cd ../../
-cd test2/tls && go run $GOROOT/src/crypto/tls/generate_cert.go -rsa-bits 4096 -host test2.test && cd ../../
-
-// create an index.html in the webroot for each host
-echo "localhost speaking" >> localhost/www/index.html
-echo "test1.test speaking" >> test1/www/index.html
-echo "test2.test speaking" >> test2/www/index.html
-
-// run the proof of concept
-go run main.go
+sudo service tlswebserver start
 ```
 
-## Verify
-
-In another terminal you can check if it worked.
-
+To see the current status of the service use:
 ```
-openssl s_client -servername localhost -connect localhost:8443 < /dev/null 2>/dev/null | openssl x509 -fingerprint -noout -in /dev/stdin
-openssl s_client -servername test1.test -connect test1.test:8443 < /dev/null 2>/dev/null | openssl x509 -fingerprint -noout -in /dev/stdin
-openssl s_client -servername test2.test -connect test2.test:8443 < /dev/null 2>/dev/null | openssl x509 -fingerprint -noout -in /dev/stdin
+sudo service tlswebserver status
 ```
 
-You should see three different fingerprints.
+You can stop the service like this:
 
-Note: The TLSHost which comes first in the config ('localhost' in above example) is the default host. In case of confusion this certificate will be presented.
-
+```
+sudo service tlswebserver stop
+```
