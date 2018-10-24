@@ -24,15 +24,15 @@ Issue an initial certificate for your domain.
 Exchange _yourexample.org_ with your domain in all following examples.
 
 ```
-acme.sh --issue -d yourexample.org -w /var/TLSWebServer/yourexample.org/gwww
+acme.sh --issue -d yourexample.org -w /var/TLSWebServer/yourexample.org/www
 ```
 
 ### Install your certificate
 
 ```
 acme.sh --install-cert -d yourexample.org \
- --key-file /var/TLSWebServer/yourexample.org/gtls/key.pem \
- --fullchain-file /var/TLSWebServer/yourexample.org/gtls/cert.pem \
+ --key-file /var/TLSWebServer/yourexample.org/tls/key.pem \
+ --fullchain-file /var/TLSWebServer/yourexample.org/tls/cert.pem \
  --reloadcmd "sudo service tlswebserver force-reload"
 ```
 
@@ -43,5 +43,5 @@ Cool, isn't it?
 
 If you ever need to renew your certifcate before automatic renewal, you can do:
 ```
-acme.sh --renew -d yourexample.org -w /var/TLSWebServer/yourexample.org/gwww/ --force
+acme.sh --renew -d yourexample.org -w /var/TLSWebServer/yourexample.org/www/ --force
 ```
