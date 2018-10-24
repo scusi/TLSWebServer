@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -32,38 +31,36 @@ type Config struct {
 }
 
 var configFile string
+var showVersion bool
 
 func init() {
 	flag.StringVar(&configFile, "conf", "/etc/TLSWebServer/config.json", "config file to load")
+	flag.BoolVar(&showVersion, "version", false, "shows version info and exits")
 }
 
 func main() {
 	flag.Parse()
 	t := log.Logger{}
 	var err error
-	//conf, err := config.ReadConfigFile(configFile)
+	if showVersion {
+		fmt.Printf("TLSWebServer Version: %s, Commit: %s, Builddate: %s\n", version, commit, date)
+		return
+	}
 	conf, err := ReadConfig(configFile)
 	if err != nil {
 		log.Fatal(err)
 	}
-	//log.Printf("ReadConf:\n%+v\n", conf)
 
 	if err != nil {
 		t.Fatal(err)
 	}
-	//log.Printf("read conf:\n%+v\n", conf)
 	// setup routing for the TLSHosts
-	/*
-		mux := http.NewServeMux()
-		for _, host := range conf.TLSHosts {
-			mux.Handle(host.Hostname+"/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
-		}
-	*/
-	r := mux.NewRouter()
+	mux := http.NewServeMux()
+	// you can see a version info if you request it like with the below curl command
+	// curl -k --resolve tlswebserver:8443:127.0.0.1 https://tlswebserver:8443/server-version/
+	mux.HandleFunc("tlswebserver/server-version/", Version)
 	for _, host := range conf.TLSHosts {
-		s := r.Host(host.Hostname).Subrouter()
-		s.HandleFunc("/server-version/", Version)
-		s.Handle("/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
+		mux.Handle(host.Hostname+"/", LogRequest(http.FileServer(http.Dir(host.Webroot))))
 	}
 
 	// setup a TLS server
@@ -90,7 +87,6 @@ func main() {
 	tlsConfig.Certificates = make([]tls.Certificate, len(conf.TLSHosts))
 	// go http server treats the 0'th key as a default fallback key
 	for i, host := range conf.TLSHosts {
-		//log.Printf("host:\n%+v\n", host)
 		tlsConfig.Certificates[i], err = tls.LoadX509KeyPair(host.TLSCertPath, host.TLSKeyPath)
 		if err != nil {
 			t.Fatal(err)
@@ -104,7 +100,7 @@ func main() {
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 		TLSConfig:      tlsConfig,
-		Handler:        r,
+		Handler:        mux,
 	}
 	listener, err := tls.Listen("tcp", conf.ListenAddr, tlsConfig)
 	if err != nil {
