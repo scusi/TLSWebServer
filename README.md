@@ -93,4 +93,4 @@ sudo service tlswebserver stop
 
 ## Automatic Certificate Renewal
 
-Please see [AutomaticCertificateRenewal.md](AutomaticCertificateRenewal.md)
+Please see [AutomaticCertificateRenewal.md](AutomaticCertificateRenewal.md) for information how you can use _acme.sh_ and _Let's Encrypt_ in order to have valid signed TLS certificates which renew automatically.
