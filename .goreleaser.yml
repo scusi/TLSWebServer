@@ -57,7 +57,7 @@ nfpm:
   vendor: Scusi.io
   # Your app's homepage.
   # Default is empty.
-  homepage: https://github.com/scusi/
+  homepage: https://github.com/scusi/TLSWebServer
 
   # Your app's maintainer (probably you).
   # Default is empty.
@@ -74,7 +74,7 @@ nfpm:
   # Formats to be generated.
   formats:
     - deb
-      #- rpm
+    - rpm
 
   # Override default /usr/local/bin destination for binaries
   bindir: /usr/local/bin
