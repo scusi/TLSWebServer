@@ -20,8 +20,8 @@ Basically there are just two sections.
 - `TLSHosts` is a list of hostnames TLSWebServer serves.
    For each TLSHost you need to configure:
    - a `Hostname`
-   - a path to the TLS certificate and key
-   - a directory where the content is you want to serve under the given hostname.
+   - a path to the TLS certificate and key, namely `TLSCertPath` and `TLSKeyPath`
+   - a `Webroot` directory, where the content is you want to serve under the given hostname.
 
 ### add another host to your config
 
