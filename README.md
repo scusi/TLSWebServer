@@ -90,3 +90,7 @@ You can stop the service like this:
 ```
 sudo service tlswebserver stop
 ```
+
+## Automatic Certificate Renewal
+
+Please see [AutomaticCertificateRenewal.md](AutomaticCertificateRenewal.md)
