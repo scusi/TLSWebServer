@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"time"
 )
@@ -26,8 +27,9 @@ type TLSHost struct {
 }
 
 type Config struct {
-	ListenAddr string
-	TLSHosts   []TLSHost
+	ListenAddr   string
+	RedirectHttp bool
+	TLSHosts     []TLSHost
 }
 
 var configFile string
@@ -36,6 +38,12 @@ var showVersion bool
 func init() {
 	flag.StringVar(&configFile, "conf", "/etc/TLSWebServer/config.json", "config file to load")
 	flag.BoolVar(&showVersion, "version", false, "shows version info and exits")
+}
+
+func TLSRedirect(w http.ResponseWriter, req *http.Request) {
+	http.Redirect(w, req,
+		"https://"+req.Host+req.URL.String(),
+		http.StatusMovedPermanently)
 }
 
 func main() {
@@ -53,6 +61,19 @@ func main() {
 
 	if err != nil {
 		t.Fatal(err)
+	}
+	// setup a http to https redirector on port 80
+	if conf.RedirectHttp == true {
+		log.Printf("Starting a HTTP redirector\n")
+		go func() {
+			httpMux := http.NewServeMux()
+			httpMux.HandleFunc("/", TLSRedirect)
+			host, _, err := net.SplitHostPort(conf.ListenAddr)
+			httpAddr := net.JoinHostPort(host, "80")
+			log.Println("Starting http server on %s\n", httpAddr)
+			err = http.ListenAndServe(httpAddr, httpMux)
+			log.Fatal(err)
+		}()
 	}
 	// setup routing for the TLSHosts
 	mux := http.NewServeMux()

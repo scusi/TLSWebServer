@@ -14,9 +14,10 @@ The configuration file is located in _/etc/TLSWebServer/config.json_.
 You can edit that file to your needs. 
 Please take care that you end up with a valid JSON file.
 
-Basically there are just two sections.
+Basically there are just 3 sections.
 
 - `ListenAddr` is the IP:Port combination TLSWebServer should listen for incoming connections.
+- `RedirectHttp` if true it will start a listener on port 80 and redirect http to https
 - `TLSHosts` is a list of hostnames TLSWebServer serves.
    For each TLSHost you need to configure:
    - a `Hostname`
@@ -32,6 +33,7 @@ Your config file for example should look like this afterwards:
 ```
 {
   "ListenAddr": ":8443",
+  "RedirectHttp": false,
   "TLSHosts": [
     {
       "Hostname": "localhost",
