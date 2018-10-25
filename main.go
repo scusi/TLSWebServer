@@ -70,7 +70,7 @@ func main() {
 			httpMux.HandleFunc("/", TLSRedirect)
 			host, _, err := net.SplitHostPort(conf.ListenAddr)
 			httpAddr := net.JoinHostPort(host, "80")
-			log.Println("Starting http server on %s\n", httpAddr)
+			log.Printf("Starting http server on %s\n", httpAddr)
 			err = http.ListenAndServe(httpAddr, httpMux)
 			log.Fatal(err)
 		}()
