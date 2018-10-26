@@ -1,5 +1,6 @@
 {
   "ListenAddr": ":8443",
+  "RedirectHttp": true,
   "TLSHosts": [
     {
       "Hostname": "localhost",
