@@ -1,0 +1,12 @@
+[Unit]
+Description=scpdrop
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/scpdrop server -c /etc/scpdrop/scpdrop.conf
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

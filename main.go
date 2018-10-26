@@ -27,6 +27,7 @@ type TLSHost struct {
 }
 
 type Config struct {
+	ScpAddr      string
 	ListenAddr   string
 	RedirectHttp bool
 	TLSHosts     []TLSHost
