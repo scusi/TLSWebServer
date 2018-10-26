@@ -40,10 +40,19 @@ func init() {
 	flag.BoolVar(&showVersion, "version", false, "shows version info and exits")
 }
 
-func TLSRedirect(w http.ResponseWriter, req *http.Request) {
-	http.Redirect(w, req,
-		"https://"+req.Host+req.URL.String(),
-		http.StatusMovedPermanently)
+func (conf *Config) TLSRedirect(w http.ResponseWriter, r *http.Request) {
+	for _, h := range conf.TLSHosts {
+		if r.Host == h.Hostname {
+			http.Redirect(w, r,
+				"https://"+r.Host+r.URL.String(),
+				http.StatusMovedPermanently)
+			pattern := `%s - "%s %s %s %s"`
+			log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
+			return
+		}
+	}
+	http.NotFound(w, r)
+	return
 }
 
 func main() {
@@ -67,7 +76,7 @@ func main() {
 		log.Printf("Starting a HTTP redirector\n")
 		go func() {
 			httpMux := http.NewServeMux()
-			httpMux.HandleFunc("/", TLSRedirect)
+			httpMux.HandleFunc("/", conf.TLSRedirect)
 			host, _, err := net.SplitHostPort(conf.ListenAddr)
 			httpAddr := net.JoinHostPort(host, "80")
 			log.Printf("Starting http server on %s\n", httpAddr)
@@ -169,5 +178,7 @@ func LogRequest(next http.Handler) http.Handler {
 }
 
 func Version(w http.ResponseWriter, r *http.Request) {
+	pattern := `%s - "%s %s %s %s"`
+	log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
 	fmt.Fprintf(w, "TLSWebServer (multiDomain)\nVersion: %v,\nCommit %v,\nbuilt at %v\n", version, commit, date)
 }
