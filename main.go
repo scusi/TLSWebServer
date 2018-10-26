@@ -34,10 +34,20 @@ type Config struct {
 
 var configFile string
 var showVersion bool
+var addHost bool
+var delHost bool
+var newHost *TLSHost
 
 func init() {
 	flag.StringVar(&configFile, "conf", "/etc/TLSWebServer/config.json", "config file to load")
 	flag.BoolVar(&showVersion, "version", false, "shows version info and exits")
+	flag.BoolVar(&addHost, "add", false, "add a TLSHost")
+	flag.BoolVar(&delHost, "del", false, "delete a TLSHost")
+	newHost = new(TLSHost)
+	flag.StringVar(&newHost.Hostname, "host", "", "hostname to add or delete")
+	flag.StringVar(&newHost.TLSCertPath, "cert", "", "path to cert")
+	flag.StringVar(&newHost.TLSKeyPath, "key", "", "path to key file")
+	flag.StringVar(&newHost.Webroot, "w", "", "path to webroot")
 }
 
 func (conf *Config) TLSRedirect(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +67,7 @@ func (conf *Config) TLSRedirect(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	flag.Parse()
-	t := log.Logger{}
+	//t := log.Logger{}
 	var err error
 	if showVersion {
 		fmt.Printf("TLSWebServer Version: %s, Commit: %s, Builddate: %s\n", version, commit, date)
@@ -68,8 +78,31 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err != nil {
-		t.Fatal(err)
+	if addHost {
+		log.Printf("going to add host %s\n", newHost.Hostname)
+		conf.TLSHosts = append(conf.TLSHosts, *newHost)
+		WriteConfig(configFile, conf)
+		return
+	}
+
+	if delHost {
+		log.Printf("going to delete host %s\n", newHost.Hostname)
+		var tlsHosts = conf.TLSHosts
+		for i, h := range tlsHosts {
+			if h.Hostname == newHost.Hostname {
+				log.Printf("found host to delete at position %d in conf.TLSHosts\n", i)
+				if len(tlsHosts) <= i+1 {
+					tlsHosts = tlsHosts[:i]
+				} else {
+					tlsHosts = append(tlsHosts[:i], tlsHosts[i+1:]...)
+				}
+				log.Printf("after delete conf.TLSHosts looks like: %+v\n", tlsHosts)
+			}
+		}
+		//log.Printf("after range tlsHosts looks like: %+v\n", tlsHosts)
+		conf.TLSHosts = tlsHosts
+		WriteConfig(configFile, conf)
+		return
 	}
 	// setup a http to https redirector on port 80
 	if conf.RedirectHttp == true {
@@ -119,7 +152,7 @@ func main() {
 	for i, host := range conf.TLSHosts {
 		tlsConfig.Certificates[i], err = tls.LoadX509KeyPair(host.TLSCertPath, host.TLSKeyPath)
 		if err != nil {
-			t.Fatal(err)
+			log.Fatal(err)
 		}
 	}
 	tlsConfig.BuildNameToCertificate()
@@ -134,7 +167,7 @@ func main() {
 	}
 	listener, err := tls.Listen("tcp", conf.ListenAddr, tlsConfig)
 	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 
 	}
 	log.Fatal(server.Serve(listener))
@@ -145,11 +178,11 @@ func WriteConfig(filename string, conf Config) (err error) {
 	if err != nil {
 		return
 	}
-	err = ioutil.WriteFile("config.json", jBytes, 0700)
+	err = ioutil.WriteFile(filename, jBytes, 0700)
 	if err != nil {
 		return
 	}
-	log.Printf("config written to: %s\n", "config.json")
+	log.Printf("config written to: %s\n", filename)
 	return
 }
 
