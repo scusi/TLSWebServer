@@ -27,8 +27,10 @@ type TLSHost struct {
 }
 
 type Config struct {
+	Logfile      string
+	Loglevel     string // Trace, Info, Warning, Error
 	ScpAddr      string
-	ListenAddr   string
+	TLSAddr      string
 	RedirectHttp bool
 	TLSHosts     []TLSHost
 }
@@ -38,6 +40,8 @@ var showVersion bool
 var addHost bool
 var delHost bool
 var newHost *TLSHost
+var err error
+var logger *log.Logger
 
 func init() {
 	flag.StringVar(&configFile, "conf", "/etc/TLSWebServer/config.json", "config file to load")
@@ -58,7 +62,7 @@ func (conf *Config) TLSRedirect(w http.ResponseWriter, r *http.Request) {
 				"https://"+r.Host+r.URL.String(),
 				http.StatusMovedPermanently)
 			pattern := `%s - "%s %s %s %s"`
-			log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
+			Info.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
 			return
 		}
 	}
@@ -69,25 +73,29 @@ func (conf *Config) TLSRedirect(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 	//t := log.Logger{}
-	var err error
+	logger, err = AllLogger("-")
+	if err != nil {
+		Error.Println(err)
+	}
 	if showVersion {
 		fmt.Printf("TLSWebServer Version: %s, Commit: %s, Builddate: %s\n", version, commit, date)
 		return
 	}
+	logger.Printf("TLSWebServer Version: %s, Commit: %s, Builddate: %s\n", version, commit, date)
 	conf, err := ReadConfig(configFile)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	if addHost {
-		log.Printf("going to add host %s\n", newHost.Hostname)
+		logger.Printf("going to add host %s\n", newHost.Hostname)
 		conf.TLSHosts = append(conf.TLSHosts, *newHost)
 		WriteConfig(configFile, conf)
 		return
 	}
 
 	if delHost {
-		log.Printf("going to delete host %s\n", newHost.Hostname)
+		logger.Printf("going to delete host %s\n", newHost.Hostname)
 		var tlsHosts = conf.TLSHosts
 		for i, h := range tlsHosts {
 			if h.Hostname == newHost.Hostname {
@@ -97,7 +105,7 @@ func main() {
 				} else {
 					tlsHosts = append(tlsHosts[:i], tlsHosts[i+1:]...)
 				}
-				log.Printf("after delete conf.TLSHosts looks like: %+v\n", tlsHosts)
+				logger.Printf("after delete conf.TLSHosts looks like: %+v\n", tlsHosts)
 			}
 		}
 		//log.Printf("after range tlsHosts looks like: %+v\n", tlsHosts)
@@ -107,15 +115,15 @@ func main() {
 	}
 	// setup a http to https redirector on port 80
 	if conf.RedirectHttp == true {
-		log.Printf("Starting a HTTP redirector\n")
+		logger.Printf("Starting a HTTP redirector\n")
 		go func() {
 			httpMux := http.NewServeMux()
 			httpMux.HandleFunc("/", conf.TLSRedirect)
-			host, _, err := net.SplitHostPort(conf.ListenAddr)
+			host, _, err := net.SplitHostPort(conf.TLSAddr)
 			httpAddr := net.JoinHostPort(host, "80")
-			log.Printf("Starting http server on %s\n", httpAddr)
+			logger.Printf("Starting http server on %s\n", httpAddr)
 			err = http.ListenAndServe(httpAddr, httpMux)
-			log.Fatal(err)
+			logger.Fatal(err)
 		}()
 	}
 	// setup routing for the TLSHosts
@@ -153,7 +161,7 @@ func main() {
 	for i, host := range conf.TLSHosts {
 		tlsConfig.Certificates[i], err = tls.LoadX509KeyPair(host.TLSCertPath, host.TLSKeyPath)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}
 	tlsConfig.BuildNameToCertificate()
@@ -166,12 +174,13 @@ func main() {
 		TLSConfig:      tlsConfig,
 		Handler:        mux,
 	}
-	listener, err := tls.Listen("tcp", conf.ListenAddr, tlsConfig)
+	listener, err := tls.Listen("tcp", conf.TLSAddr, tlsConfig)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 
 	}
-	log.Fatal(server.Serve(listener))
+	logger.Printf("TLS listener started at '%s'\n", conf.TLSAddr)
+	logger.Fatal(server.Serve(listener))
 }
 
 func WriteConfig(filename string, conf Config) (err error) {
@@ -183,7 +192,7 @@ func WriteConfig(filename string, conf Config) (err error) {
 	if err != nil {
 		return
 	}
-	log.Printf("config written to: %s\n", filename)
+	logger.Printf("config written to: %s\n", filename)
 	return
 }
 
@@ -203,7 +212,7 @@ func ReadConfig(filename string) (conf Config, err error) {
 func LogRequest(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		pattern := `%s - "%s %s %s %s"`
-		log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
+		logger.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
 
 		next.ServeHTTP(w, r)
 	}
@@ -213,6 +222,6 @@ func LogRequest(next http.Handler) http.Handler {
 
 func Version(w http.ResponseWriter, r *http.Request) {
 	pattern := `%s - "%s %s %s %s"`
-	log.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
+	logger.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
 	fmt.Fprintf(w, "TLSWebServer (multiDomain)\nVersion: %v,\nCommit %v,\nbuilt at %v\n", version, commit, date)
 }

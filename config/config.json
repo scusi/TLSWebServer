@@ -1,6 +1,9 @@
 {
-  "ListenAddr": ":8443",
+  "TLSAddr": ":443",
+  "ScpAddr": ":2022",
   "RedirectHttp": true,
+  "Logfile": "-",
+  "Loglevel": "TRACE",
   "TLSHosts": [
     {
       "Hostname": "localhost",
