@@ -11,13 +11,15 @@ var (
 	Info    *log.Logger
 	Warning *log.Logger
 	Error   *log.Logger
+	Access  *log.Logger
 )
 
-func Init(
+func InitLogging(
 	traceHandle io.Writer,
 	infoHandle io.Writer,
 	warningHandle io.Writer,
-	errorHandle io.Writer) {
+	errorHandle io.Writer,
+	accessHandle io.Writer) {
 
 	Trace = log.New(traceHandle,
 		"TRACE: ",
@@ -35,12 +37,15 @@ func Init(
 		"ERROR: ",
 		log.Ldate|log.Ltime|log.Lshortfile)
 
+	Access = log.New(accessHandle,
+		"ACCESS: ",
+		log.Ldate|log.Ltime|log.Lshortfile)
 }
 
-func AllLogger(logfile string) (*log.Logger, error) {
+func NewLogger(logfile string, prefix string) (*log.Logger, error) {
 	// log to stdout
 	if logfile == "-" {
-		logger := log.New(os.Stderr, "ALL: ", log.Ldate|log.Ltime|log.Lshortfile)
+		logger := log.New(os.Stderr, prefix+": ", log.Ldate|log.Ltime|log.Lshortfile)
 		return logger, nil
 	}
 	// log to file
@@ -49,6 +54,6 @@ func AllLogger(logfile string) (*log.Logger, error) {
 		log.Fatalln("Failed to open logfile", logfile, ":", err)
 		return nil, err
 	}
-	logger := log.New(file, "ALL: ", log.Ldate|log.Ltime|log.Lshortfile)
+	logger := log.New(file, prefix, log.Ldate|log.Ltime|log.Lshortfile)
 	return logger, nil
 }
