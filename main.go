@@ -73,6 +73,7 @@ func (conf *Config) TLSRedirect(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 	//t := log.Logger{}
+	// configure logfile to stdout, for now
 	logger, err = AllLogger("-")
 	if err != nil {
 		Error.Println(err)
@@ -85,6 +86,11 @@ func main() {
 	conf, err := ReadConfig(configFile)
 	if err != nil {
 		logger.Fatal(err)
+	}
+	// reconfig logfile from config value
+	logger, err = AllLogger(conf.Logfile)
+	if err != nil {
+		Error.Println(err)
 	}
 
 	if addHost {
