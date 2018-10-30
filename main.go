@@ -67,6 +67,9 @@ func (conf *Config) TLSRedirect(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	pattern := `%s - "%s %s %s %s"`
+	Info.Printf(pattern, r.RemoteAddr, r.Host, r.Proto, r.Method, r.URL.RequestURI())
+	Warning.Printf("Could not redirect '%s%s' from %s to any TLSHost\n", r.Host, r.URL.RequestURI(), r.RemoteAddr)
 	http.NotFound(w, r)
 	return
 }
