@@ -1,6 +1,8 @@
-# TLSWebServer
+# TLSWebServer (singleHost branch)
 
 A very simple TLS webserver written in golang.
+This variant (singleHost) just supports one hostname to be configurable.
+For multiple host support please have a look at the multiDomain branch.
 
 ## Features
 
