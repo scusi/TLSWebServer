@@ -83,7 +83,8 @@ nfpm:
 
   # Your app's license.
   # Default is empty.
-  # license: Apache 2.0
+  #license: Apache 2.0
+  license: Unlincense 
 
   # Formats to be generated.
   formats:
