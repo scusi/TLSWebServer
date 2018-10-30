@@ -1,68 +1,21 @@
 # TLSWebServer with multiple domain support
 
+TLSWebserver is a two daemon package that combines a tls only webserver with
+a scp (secure copy protocol) server.
+
+It's purpose is to run a secure webserver easily.
+
+## Design Goals
+
+- TLS certificates can be updated automatically.
+- Webcontent of hosts can easily be updated over the network, 
+  also by 3rd party users.
+- relative secure solution.
+- sane TLS settings
+
 ## Install
 
-### Install the .deb package
-
-The easiest way to install TLSWebserver is to use the released .deb or .rpm package.
-You can find the packages in the [releases](https://github.com/scusi/TLSWebServer/releases) folder.
-Please choose a package that corresponds to your architecture and operating system.
-
-## Configure TLSWebServer
-
-The configuration file is located in _/etc/TLSWebServer/config.json_.
-You can edit that file to your needs. 
-Please take care that you end up with a valid JSON file.
-
-Basically there are just 3 sections.
-
-- `ListenAddr` is the IP:Port combination TLSWebServer should listen for incoming connections.
-- `RedirectHttp` if true it will start a listener on port 80 and redirect http to https
-- `TLSHosts` is a list of hostnames TLSWebServer serves.
-   For each TLSHost you need to configure:
-   - a `Hostname`
-   - a path to the TLS certificate and key, namely `TLSCertPath` and `TLSKeyPath`
-   - a `Webroot` directory, where the content is you want to serve under the given hostname.
-
-### add another host to your config
-
-If you want to add another hostname to your config, simply clone the TLSHosts section 
-for local host and ajust it to your needs.
-
-Your config file for example should look like this afterwards:
-```
-{
-  "ListenAddr": ":8443",
-  "RedirectHttp": false,
-  "TLSHosts": [
-    {
-      "Hostname": "localhost",
-      "TLSCertPath": "/var/TLSWebServer/localhost/tls/cert.pem",
-      "TLSKeyPath": "/var/TLSWebServer/localhost/tls/key.pem",
-      "Webroot": "/var/TLSWebServer/localhost/www/"
-    },
-    {
-      "Hostname": "yourexample.org",
-      "TLSCertPath": "/var/TLSWebServer/yourexample.org/tls/cert.pem",
-      "TLSKeyPath": "/var/TLSWebServer/yourexample.org/tls/key.pem",
-      "Webroot": "/var/TLSWebServer/yourexample.org/www/"
-    },
-  ]
-}
-
-```
-
-After adding a new TLSHost section to the config file make sure: 
-- the certificates are in place and readable by the server process.
-- the webroot does exist and have some content
-
-When all of the above is done you can simply restart your TLSWebServer with the following command in order to apply changes.
-
-```
-sudo service tlswebserver restart
-```
-
-Point your browser to the URL for your configured hostname, e.g. `https://yourexample.org:8443/`
+Please see [INSTALL.md](INSTALL.md)
 
 ## Certificates
 
