@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/user"
 	"path/filepath"
 )
@@ -15,11 +17,21 @@ var tlsCertPath string
 var tlsKeyPath string
 var staticDir string
 */
-var usr *user.User
-var ConfigFilePath string
-var ConfigFileLocations []string
-var cfg *Config
-var err error
+
+// Variables for version information
+var (
+	Version   string
+	Commit    string
+	Branch    string
+	Buildtime string
+
+	usr                 *user.User
+	ConfigFilePath      string
+	ConfigFileLocations []string
+	cfg                 *Config
+	err                 error
+	showVersion         bool
+)
 
 func init() {
 	usr, err := user.Current()
@@ -35,6 +47,7 @@ func init() {
 	cfg = NewConfig("")
 
 	flag.StringVar(&ConfigFilePath, "conf", "./config.yml", "path to config file")
+	flag.BoolVar(&showVersion, "version", false, "shows version information and exists")
 	//flag.StringVar(&cfg.HttpAddr, "http", "", "http to https redirector listen address")
 	//flag.StringVar(&cfg.HttpsAddr, "https", ":443", "https listen address")
 	//flag.StringVar(&cfg.TLSCertPath, "cert", "./tls/cert.pem", "tls certificate PEM file")
@@ -44,6 +57,10 @@ func init() {
 
 func main() {
 	flag.Parse()
+	if showVersion {
+		fmt.Printf("Version: %s, based on branch: %s (commit: %s), Buildtime: %s\n", Version, Branch, Commit, Buildtime)
+		os.Exit(1)
+	}
 	if ConfigFilePath != "" {
 		cfg = NewConfig(ConfigFilePath)
 	}
