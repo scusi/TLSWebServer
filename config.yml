@@ -1,0 +1,22 @@
+# example config for TLSWebServer
+#
+# HttpAddr is the address for the http redirector to listen to.
+# HttpAddr has the format "IP:PORT" or "HOSTNAME:PORT".
+# It is valid to have just write ":PORT". 
+# In this case http redirector listens on all available interfaces.
+# If HttpAddr is empty no http redirector will be started.
+# All requests that are made to this Address will be redirected to the HttpsAddress.
+HttpAddr: :8080
+
+# HttpsAddr is the address the tls web server listens to.
+# Format is the same as with HttpAddr 
+HttpsAddr: :8443
+
+# Path to TLS certificate file in PEM format
+TLSCertPath: tls/cert.pem
+
+# Path to TLS key file in PEM format, without a passphrase.
+TLSKeyPath: tls/key.pem
+
+# StaticDir is the path to the web root directory
+StaticDir: www 
