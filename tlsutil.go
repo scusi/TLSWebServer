@@ -9,6 +9,7 @@ import (
 	"syscall"
 )
 
+// keypairReloader holds everything to reload certificate and key during runtime
 type keypairReloader struct {
 	certMu   sync.RWMutex
 	cert     *tls.Certificate
@@ -16,6 +17,8 @@ type keypairReloader struct {
 	keyPath  string
 }
 
+// NewKeypairReloader holds the logic to reload cert and key during runtime,
+// setsup a go routine to listen for SIGHUP signals to the webserver process in order to actually reload cert and key.
 func NewKeypairReloader(certPath, keyPath string) (*keypairReloader, error) {
 	result := &keypairReloader{
 		certPath: certPath,
@@ -39,6 +42,7 @@ func NewKeypairReloader(certPath, keyPath string) (*keypairReloader, error) {
 	return result, nil
 }
 
+// maybeReload, function to reload cert and key if it has changed.
 func (kpr *keypairReloader) maybeReload() error {
 	newCert, err := tls.LoadX509KeyPair(kpr.certPath, kpr.keyPath)
 	if err != nil {
@@ -50,6 +54,7 @@ func (kpr *keypairReloader) maybeReload() error {
 	return nil
 }
 
+// GetCertificateFunc is a function that returns the actual certificate to a requesting client during TLS handshake
 func (kpr *keypairReloader) GetCertificateFunc() func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
 	return func(clientHello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 		kpr.certMu.RLock()

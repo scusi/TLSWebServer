@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-/*
+/* // obsolete variables with configuratino details, now delivered via config file
 var httpAddr string
 var httpsAddr string
 var tlsCertPath string
@@ -18,32 +18,33 @@ var tlsKeyPath string
 var staticDir string
 */
 
-// Variables for version information
 var (
-	Version   string
-	Commit    string
-	Branch    string
-	Buildtime string
-
-	usr                 *user.User
-	ConfigFilePath      string
-	ConfigFileLocations []string
-	cfg                 *Config
-	err                 error
-	showVersion         bool
+	Version             string     // Version set during compile time, e.g. v0.1.42
+	Commit              string     // git commit, set during compiletime
+	Branch              string     // git branch, set during compile time
+	Buildtime           string     // compile timestamp
+	usr                 *user.User // variable that holds the user environment
+	ConfigFilePath      string     // holds path to config file
+	ConfigFileLocations []string   // holds default locations to look for a config file
+	cfg                 *Config    // pointer to configuration slice
+	err                 error      // global error variable
+	showVersion         bool       // if true programm prints version, commit, branch and buildtime, then exit
 )
 
 func init() {
+	// determine current user
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal("Can not determine current user: ", err)
 	}
+	// fill default config locations
 	ConfigFileLocations = []string{
 		"/etc/TLSWebserver/config.yml",
 		"/usr/local/etc/TLSWebServer/config.yml",
 		filepath.Join(usr.HomeDir, ".config/TLSWebServer/config.yml"),
 		"./config.yml",
 	}
+	// create a new config with default values
 	cfg = NewConfig("")
 
 	flag.StringVar(&ConfigFilePath, "conf", "./config.yml", "path to config file")

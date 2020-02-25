@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// LogRequest is a middleware that just logs a request
 func LogRequest(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		pattern := `%s - "%s %s %s"`
@@ -16,6 +17,10 @@ func LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
+// SecureHeaders is a middleware that sets the following security related HTTP Headers:
+// X-Content-Type-Options: nosniff
+// X-Frame-Options: deny
+// X-XSS-Protection: 1; mode=block
 func SecureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")

@@ -7,7 +7,9 @@ import (
 	"time"
 )
 
+// RunTLSServer configures and starts a TLS web server
 func (app *App) RunTLSServer() {
+	// define the TLS config
 	tlsConfig := &tls.Config{
 		MinVersion:               tls.VersionTLS12,
 		MaxVersion:               tls.VersionTLS12,
@@ -38,13 +40,13 @@ func (app *App) RunTLSServer() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-
+	// make sure we can reload certificates and keys during runtime
 	kpr, err := NewKeypairReloader(cfg.TLSCertPath, cfg.TLSKeyPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	srv.TLSConfig.GetCertificate = kpr.GetCertificateFunc()
-
+	// start the server
 	log.Printf("Starting server on %s", app.Addr)
 	err = srv.ListenAndServeTLS("", "")
 	log.Fatal(err)
