@@ -3,7 +3,7 @@
 builds:
 - main: cmd/gencert/generate_cert.go
   binary: gencert
-  id: gencert
+  id: "gencert"
   goos:
        - windows
        - linux
@@ -15,19 +15,7 @@ builds:
        - arm64
 - main: cmd/reloadCerts/main.go
   binary: reloadCerts
-  id: reloadCerts
-  goos:
-       - windows
-       - linux
-       - darwin
-  goarch:
-       - 386
-       - amd64
-       - arm
-       - arm64
-- main: . 
-  binary: TLSWebServer
-  id: TLSWebServer
+  id: "reloadCerts"
   goos:
        - windows
        - linux
