@@ -5,14 +5,18 @@ import (
 	"log"
 )
 
+// Config holds the configuration settings
 type Config struct {
-	HttpAddr    string
-	HttpsAddr   string
-	TLSCertPath string
-	TLSKeyPath  string
-	StaticDir   string
+	HttpAddr    string // listening address of the http -> https redirector
+	HttpsAddr   string // listening address of the tls web server
+	TLSCertPath string // path to certificate file, PEM encoded
+	TLSKeyPath  string // path to key file, PEM encoded, without passphrase
+	StaticDir   string // path to webroot directory
 }
 
+// NewConfig - load a config file from a given path,
+// if a empty path is given it will search a config file from the default config locations,
+// if no config file could be found it returns a config with default values.
 func NewConfig(path string) (cfg *Config) {
 	cfg = new(Config)
 	if path == "" {
@@ -35,31 +39,31 @@ func NewConfig(path string) (cfg *Config) {
 	cfg.HttpAddr, err = config.GetString("HttpAddr")
 	if err != nil {
 		log.Println("Config Error: " + err.Error())
-		cfg.HttpAddr = ":80"
+		cfg.HttpAddr = ":8080" // set default value 'HttpAddr=":8080"'
 	}
 
 	cfg.HttpsAddr, err = config.GetString("HttpsAddr")
 	if err != nil {
 		log.Println("Config Error: " + err.Error())
-		cfg.HttpsAddr = ":443"
+		cfg.HttpsAddr = ":8443" // set default value 'HttpsAddr=":8443"'
 	}
 
 	cfg.TLSCertPath, err = config.GetString("TLSCertPath")
 	if err != nil {
 		log.Println("Config Error: " + err.Error())
-		cfg.TLSCertPath = "tls/cert.pem"
+		cfg.TLSCertPath = "tls/cert.pem" // set default certificate path
 	}
 
 	cfg.TLSKeyPath, err = config.GetString("TLSKeyPath")
 	if err != nil {
 		log.Println("Config Error: " + err.Error())
-		cfg.TLSKeyPath = "tls/key.pem"
+		cfg.TLSKeyPath = "tls/key.pem" // set default key path
 	}
 
 	cfg.StaticDir, err = config.GetString("StaticDir")
 	if err != nil {
 		log.Println("Config Error: " + err.Error())
-		cfg.StaticDir = "www"
+		cfg.StaticDir = "www" // set default path to webroot
 	}
 	return cfg
 }

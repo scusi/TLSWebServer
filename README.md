@@ -13,6 +13,16 @@ For multiple host support please have a look at the multiDomain branch.
 - protection against slowloris kind of attacks
 - can reload certificates on the fly, no downtime
 
+
+## Build instructions
+
+This software comes with a ```Makefile```, so you can simply say:
+
+```make build``` to actually biuild the binary on your platform.
+
+If you just execute ```make``` you build the binary and directly start it.
+Befor you do that read the rest of this document.
+
 ## Getting started
 
 ### make sure DNS records point to your IP
@@ -113,10 +123,3 @@ You can also seee the current status with:
 ```
 sudo service tlswebserver status
 ```
-
-## The following websites known to use TLSWebServer
-
-If you want to be listed here contact me.
-
-- [scusiblog.org](https://scusiblog.org)
-
