@@ -8,7 +8,8 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"github.com/dimfeld/httptreemux"
+	//"github.com/dimfeld/httptreemux"
+	//"strings"
 )
 
 /* // obsolete variables with configuratino details, now delivered via config file
@@ -58,6 +59,7 @@ func init() {
 }
 
 func main() {
+
 	flag.Parse()
 	if showVersion {
 		fmt.Printf("Version: %s, based on branch: %s (commit: %s), Buildtime: %s\n", Version, Branch, Commit, Buildtime)
@@ -88,27 +90,18 @@ func main() {
 		log.Fatal("no Domain given but required")
 	}
 
-
 	app := &App{
-		domain: cfg.domain,
-		httpport: cfg.httpport,
-		httpsport: cfg.httpsport,
-		StaticDir: cfg.StaticDir,
-		TLSCert:   cfg.TLSCertPath,
-		TLSKey:    cfg.TLSKeyPath,
+		domain: 	cfg.domain,
+		httpport: 	cfg.httpport,
+		httpsport: 	cfg.httpsport,
+		StaticDir: 	cfg.StaticDir,
+		TLSCert:   	cfg.TLSCertPath,
+		TLSKey:    	cfg.TLSKeyPath,
 	}
-
-router := httptreemux.New()
-
-// handle angular
-router.NotFoundHandler = app.angularHandler
-router.GET("/", app.indexHandler)
-router.GET("/*", app.staticHandler)
-router.GET("/healthcheck", app.healthCheckHandler)
 
 go func() {
 	log.Printf("Listening for HTTPS connections at: https://%v:%v", cfg.domain, cfg.httpsport)
-	app.RunTLSServer()
+		app.RunTLSServer()
 	}()
 	log.Printf("Starting Prime Frontend Server")
 	log.Printf("Listening for HTTP connections at: http://%v:%v", cfg.domain, cfg.httpport)
