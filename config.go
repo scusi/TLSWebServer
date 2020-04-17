@@ -27,7 +27,7 @@ func NewConfig(path string) (cfg *Config) {
 				log.Printf("Could not read config file from '%s'\n", cfl)
 				continue
 			}
-			log.Println("Found config file at '" + cfl + "' useing it.")
+			log.Println("Found config file at '" + cfl + "' using it.")
 			break
 		}
 	} else {
