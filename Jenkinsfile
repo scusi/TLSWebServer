@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {golang "go"}
-
-    environment {
-    }
-
     stages {
         stage('Check GO Environment') { 
             steps {
