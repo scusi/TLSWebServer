@@ -1,8 +1,8 @@
 SHELL:=/bin/bash
 GOBIN:=$(GOROOT)/bin
 
-COMMIT := $(shell git rev-parse --short DEV)
-VERSION := $(shell git tag --points-at DEV)
+COMMIT := $(shell git rev-parse --short dev)
+VERSION := $(shell git tag --points-at dev)
 BUILDTIME := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 BRANCH := $(shell git branch | grep \* | cut -d ' ' -f2)
 
