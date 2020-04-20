@@ -1,6 +1,8 @@
 pipeline {
     agent any
-
+   environment {
+       BUILD_ENV = "TEST"
+   }
     stages {
         stage('Check GO Environment') { 
             steps {
@@ -18,7 +20,7 @@ pipeline {
                 sh 'echo $PWD'
                 sh 'mkdir -p dist'
                 sh 'tar -zcvf dist/TLSWebServer.tar.gz TLSWebServer config.yml tls'
-                sh 'aws s3 cp dist/TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds/'
+                sh 'aws s3 cp dist/TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds/env.BUILD_ENV/'
             }
         }
     }
