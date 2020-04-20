@@ -17,7 +17,7 @@ pipeline {
             steps {
                 sh 'echo $PWD'
                 sh 'mkdir -p dist'
-                sh 'cd dist && tar -zcvf ../TLSWebServer.tar.gz TLSWebServer/* && cd -'
+                sh 'cd dist && tar -zcvf ../TLSWebServer.tar.gz TLSWebserverDevBuild/* && cd -'
                 sh 'aws s3 cp TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds'
             }
         }
