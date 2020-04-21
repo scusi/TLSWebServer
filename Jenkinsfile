@@ -1,14 +1,23 @@
 pipeline {
     agent any
    environment {
-       BUILD_ENV = "TEST"
+       BUILD_ENV = "DEV"
    }
     stages {
         stage('Check GO Environment') { 
             steps {
                 sh 'echo $GOROOT'
                 sh 'echo $GOPATH'
-                sh 'printenv | sort'
+                script {
+                    if( GIT_BRANCH == "origin/test" )
+                    {
+                        BUILD_ENV = "TEST"
+                    }
+                    if( GIT_BRANCH == "origin/master" )
+                    {
+                        BUILD_ENV = "PROD"
+                    }
+                }
             }
         }
         stage('Build') { 
