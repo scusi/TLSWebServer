@@ -1,4 +1,4 @@
-# TLSWebServer (master branch)
+# TLSWebServer (IC-1/dev branch)
 
 A very simple TLS webserver written in golang.
 
