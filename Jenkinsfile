@@ -8,7 +8,7 @@ pipeline {
             steps {
                 sh 'echo $GOROOT'
                 sh 'echo $GOPATH'
-                sh 'printenv'
+                sh 'printenv | sort'
                 script {
                     if( GIT_BRANCH == "origin/test" )
                     {
