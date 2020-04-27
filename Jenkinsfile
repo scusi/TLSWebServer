@@ -12,13 +12,14 @@ pipeline {
                 script {
                     if( env.GIT_BRANCH == "origin/test" )
                     {
-                        env.BUILD_ENV = "TEST"
+                        BUILD_ENV = "TEST"
                         sh 'echo swithed BUILD_ENV to '
+                        sh '${BUILD_ENV}'
                         
                     }
                     if( env.GIT_BRANCH == "origin/master" )
                     {
-                        env.BUILD_ENV = "PROD"
+                        BUILD_ENV = "PROD"
                     }
                 }
             }
@@ -33,7 +34,6 @@ pipeline {
                 // sh 'echo $PWD'
                 sh 'echo --------------'
                 sh 'echo ${BUILD_ENV}'
-                sh 'echo ${env.BUILD_ENV}'
                 sh 'echo --------------'
                 // sh 'mkdir -p dist'
                 // sh 'tar -zcvf dist/TLSWebServer.tar.gz TLSWebServer'
