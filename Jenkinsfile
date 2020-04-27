@@ -1,27 +1,10 @@
 pipeline {
     agent any
-   environment {
-       BUILD_ENV = "DEV"
-   }
     stages {
         stage('Check GO Environment') { 
             steps {
                 sh 'echo $GOROOT'
                 sh 'echo $GOPATH'
-                // sh 'printenv | sort'
-                script {
-                    if( env.GIT_BRANCH == "origin/test" )
-                    {
-                        BUILD_ENV = "TEST"
-                        sh 'echo swithed BUILD_ENV to '
-                        sh '${BUILD_ENV}'
-                        
-                    }
-                    if( env.GIT_BRANCH == "origin/master" )
-                    {
-                        BUILD_ENV = "PROD"
-                    }
-                }
             }
         }
         stage('Build') { 
@@ -31,13 +14,22 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                // sh 'echo $PWD'
-                sh 'echo --------------'
-                sh 'echo ${BUILD_ENV}'
-                sh 'echo --------------'
-                // sh 'mkdir -p dist'
-                // sh 'tar -zcvf dist/TLSWebServer.tar.gz TLSWebServer'
-                // sh 'aws s3 cp dist/TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds/${BUILD_ENV}/'
+                sh 'mkdir -p dist'
+                sh 'tar -zcvf dist/TLSWebServer.tar.gz TLSWebServer'
+                script {
+                    if( env.GIT_BRANCH == "origin/dev" )
+                    {
+                        sh 'aws s3 cp dist/TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds/DEV/'
+                    } 
+                    if( env.GIT_BRANCH == "origin/test" )
+                    {
+                        sh 'aws s3 cp dist/TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds/TEST/'
+                    } 
+                    if( env.GIT_BRANCH == "origin/master" )
+                    {
+                        sh 'aws s3 cp dist/TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds/PROD/'
+                    } 
+                }
             }
         }
     }
