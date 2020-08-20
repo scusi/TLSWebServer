@@ -56,7 +56,8 @@ How to do this depends on your setup, please find out yourself.
 ### create a selfsigned certificate
 
 Before you can start a TLSWebServer you need a certificate. In the following you learn how to create a selfsigned certificate, to get started.
-For productive use a certificate signed by a acknowledged root CA will be more suitable. Please see [AutomaticCertRenewal.md](AutomaticCertRenewal.md) document how you can archive that.
+For productive use a certificate signed by a acknowledged root CA will be more suitable. 
+Please see [AutomaticCertRenewal.md](AutomaticCertRenewal.md) document how you can archive that.
 
 ```
 mkdir -p tls
@@ -65,6 +66,7 @@ go run $GOROOT/src/crypto/tls/generate_cert.go --rsa-bits=2048 --host=localhost
 ```
 
 ### Allow TLSWebServer to bind to privileged ports
+
 When you want to use the default ports for HTTP (port 80) and HTTPS (port 443) 
 on most unice operating systems you need to have root privileges. In order to 
 avoid that - on linux - you can do:
@@ -81,11 +83,27 @@ Otherwise you have to run TLSWebServer with root privileges or use non default p
 Create a file called _config.yml_ with a content like in the following listing.
 
 ```
-HttpAddr: 127.0.0.1:8080
-HttpsAddr: 127.0.0.1:8443
-TLSCertPath: tls/cert.pem
-TLSKeyPath: tls/key.pem
-StaticDir: /path/to/your/webroot
+HttpAddr: 127.0.0.1:8080		# http listening address, only redirects to https
+					# if HttpAddr is empty, no http->https redirector will be started
+
+ExposedHttpAddr: :80 			# external http port, only relevant if not :80
+					# ExposedHttpAddr is only needed in scenarios where:
+					# the server is listening on an internal address 
+					# and the exposed (external) address 
+					# is not listening to the default port (80)
+
+HttpsAddr: 127.0.0.1:8443		# https listening address
+
+ExposedHttpsAddr: :433			# external exposed port, only relevant if not :443 
+					# ExposedHttpsAddr is only needed in scenarios where:
+					# the server is listening on an internal address 
+					# and the exposed (external) address 
+					# is not listening to the default port (443)
+
+TLSCertPath: tls/cert.pem		# path to tls certificate, PEM encoded
+TLSKeyPath: tls/key.pem			# path to tls key, PEM encoded
+
+StaticDir: /path/to/your/webroot	# path to the webroot directory
 ```
 
 ### Start TLSWebserver
@@ -94,10 +112,17 @@ You can start a TLSWebServer now with your config, like this:
 
 ```TLSWebServer -conf /path/to/your/config.yml```
 
+Note: the default value used can be set with an environment variable called `CONFIG`.
+
+```
+$>: export CONFIG="/app/config-files/config.yml"
+$>: ./TLSWebserver
+```
+
 Note: If the _-conf_ flag is omitted TLSWebServer will search for a config file in the following loctions:
+- /app/config/config.yml
 - /etc/TLSWebServer/config.yml
 - /usr/local/etc/TLSWebServer/config.yml
-- ~/.config/TLSWebServer/config.yml
 - ./config.yaml 
 
 If no config file could be found on the above default locations and there was none given on the command line it will use a default configuration.
@@ -125,7 +150,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-ExecStart=/home/you/TLSWebServer-linux-x86.bin -http 89.238.79.203:80 -https 89.238.79.203:443 -staticDir /home/you/testWeb/www/ -cert /home/you/.acme.sh/example.com/fullchain.cer -key /home/you/.acme.sh/example.com/example.com.key
+ExecStart=/path/to/binary/of/TLSWebServer -c /etc/TLSWebserver/config.yml 
 Restart=on-failure
 
 [Install]
