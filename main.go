@@ -46,7 +46,7 @@ func init() {
 	*/
 	// fill default config locations
 	ConfigFileLocations = []string{
-		"/app/config/config.yml"
+		"/app/config/config.yml",
 		"/etc/TLSWebserver/config.yml",
 		"/usr/local/etc/TLSWebServer/config.yml",
 		//filepath.Join(usr.HomeDir, ".config/TLSWebServer/config.yml"),
