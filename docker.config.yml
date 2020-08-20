@@ -8,9 +8,17 @@
 # All requests that are made to this Address will be redirected to the HttpsAddress.
 HttpAddr: :8080
 
+# ExposedHttpAddr should be set if the exposed https port is different from the HttpAddr (set above)
+# It is used for http redirects, to redirect the client to the right (exposed) http port.
+ExposedHttpsAddr: :80
+
 # HttpsAddr is the address the tls web server listens to.
 # Format is the same as with HttpAddr 
 HttpsAddr: :8443
+
+# ExposedHttpsAddr should be set if the exposed https port is different from the HttpsAddr (set above)
+# It is used for http redirects, to redirect the client to the right (exposed) https port.
+ExposedHttpsAddr: :443
 
 # Path to TLS certificate file in PEM format
 #TLSCertPath: tls/cert.pem

@@ -7,11 +7,13 @@ import (
 
 // Config holds the configuration settings
 type Config struct {
-	HttpAddr    string // listening address of the http -> https redirector
-	HttpsAddr   string // listening address of the tls web server
-	TLSCertPath string // path to certificate file, PEM encoded
-	TLSKeyPath  string // path to key file, PEM encoded, without passphrase
-	StaticDir   string // path to webroot directory
+	HttpAddr         string // listening address of the http -> https redirector
+	ExposedHttpAddr  string // the extrernaly exposed HTTP Address (Host:Port)
+	ExposedHttpsAddr string // the externally exposed TLS/HTTPS Address (Host:Port)
+	HttpsAddr        string // listening address of the tls web server
+	TLSCertPath      string // path to certificate file, PEM encoded
+	TLSKeyPath       string // path to key file, PEM encoded, without passphrase
+	StaticDir        string // path to webroot directory
 }
 
 // NewConfig - load a config file from a given path,
