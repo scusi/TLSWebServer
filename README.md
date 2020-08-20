@@ -11,6 +11,31 @@ A very simple TLS webserver written in golang.
 - protection against slowloris kind of attacks
 - can reload certificates on the fly, no downtime
 
+## Docker
+
+There is a docker image (scusi/tls-webserver:latest) that can be used to run TLSWebserver.
+
+You can test run it like this:
+```
+docker pull scusi/tls-webserver:latest
+docker run -e CONFIG=/app/config/config.yml -p 80:8080 -p 443:8443 tls-webserver:latest
+```
+
+In practice you probably want to keep the webroot and the config files persistant.
+This can be done useing volumes.
+The following docker command starts TSLWebserver with two volumes, 
+one for the config files and one for the webroot.
+
+The local folder `./www` will be mounted into the docker container at `/www`.
+The local folder `./config` will be mounted into the container at `/app/config`.
+In the config folder there are usually thre files, a config.yml, the TLS certificate in PEM format and the TLS key, also in PEM format and without a passphrase.
+
+```
+docker run -e CONFIG=/app/config/config.yml \
+	-p 80:8080 -p 443:8443 \
+	-v `pwd`/www:/www -v `pwd`/config:/app/config \
+	scusi/tls-webserver:latest
+```
 
 ## Build instructions
 
