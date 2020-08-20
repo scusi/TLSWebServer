@@ -46,6 +46,16 @@ This software comes with a ```Makefile```, so you can simply say:
 If you just execute ```make``` you build the binary and directly start it.
 Before you do that read the rest of this document.
 
+### build a docker image
+
+Use the provided [Dockerfile](Dockerfile) to build a docker image.
+
+```
+git clone git@github.com:scusi/TLSWebServer.git
+cd TLSWebserver
+docker build -t tls-webserver:my_build .
+```
+
 ## Getting started
 
 ### make sure DNS records point to your IP
