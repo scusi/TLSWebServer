@@ -13,7 +13,7 @@ A very simple TLS webserver written in golang.
 
 ## Docker
 
-There is a docker image ([scusi/tls-webserver:latest](https://hub.docker.com/repository/docker/scusi/tls-webserver)) that can be used to run TLSWebserver.
+There is a docker image ([scusi/tls-webserver:latest](https://hub.docker.com/r/scusi/tls-webserver)) that can be used to run TLSWebserver.
 
 You can test run it like this:
 ```
