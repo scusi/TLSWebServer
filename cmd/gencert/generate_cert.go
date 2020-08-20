@@ -9,7 +9,6 @@ package main
 
 import (
 	"crypto/ecdsa"
-	"crypto/ed25519"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
@@ -17,6 +16,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"flag"
+	"golang.org/x/crypto/ed25519"
 	"log"
 	"math/big"
 	"net"
