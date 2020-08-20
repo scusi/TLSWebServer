@@ -43,11 +43,21 @@ func NewConfig(path string) (cfg *Config) {
 		log.Println("Config Error: " + err.Error())
 		cfg.HttpAddr = ":8080" // set default value 'HttpAddr=":8080"'
 	}
+	cfg.ExposedHttpAddr, err = config.GetString("ExposedHttpAddr")
+	if err != nil {
+		log.Printf("Config Error: " + err.Error())
+		cfg.ExposedHttpAddr = ":80" // set default value ":80"
+	}
 
 	cfg.HttpsAddr, err = config.GetString("HttpsAddr")
 	if err != nil {
 		log.Println("Config Error: " + err.Error())
 		cfg.HttpsAddr = ":8443" // set default value 'HttpsAddr=":8443"'
+	}
+	cfg.ExposedHttpsAddr, err = config.GetString("ExposedHttpsAddr")
+	if err != nil {
+		log.Printf("Config Error: " + err.Error())
+		cfg.ExposedHttpsAddr = ":443" // set default value ":80"
 	}
 
 	cfg.TLSCertPath, err = config.GetString("TLSCertPath")
