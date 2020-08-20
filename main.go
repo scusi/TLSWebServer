@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/user"
-	"path/filepath"
+	//"os/user"
+	//"path/filepath"
 )
 
 /* // obsolete variables with configuratino details, now delivered via config file
@@ -19,35 +19,43 @@ var staticDir string
 */
 
 var (
-	Version             string     // Version set during compile time, e.g. v0.1.42
-	Commit              string     // git commit, set during compiletime
-	Branch              string     // git branch, set during compile time
-	Buildtime           string     // compile timestamp
-	usr                 *user.User // variable that holds the user environment
-	ConfigFilePath      string     // holds path to config file
-	ConfigFileLocations []string   // holds default locations to look for a config file
-	cfg                 *Config    // pointer to configuration slice
-	err                 error      // global error variable
-	showVersion         bool       // if true programm prints version, commit, branch and buildtime, then exit
+	// Version set during compile time, e.g. v0.1.42
+	Version   string
+	Commit    string // git commit, set during compiletime
+	Branch    string // git branch, set during compile time
+	Buildtime string // compile timestamp
+	//usr                 *user.User // variable that holds the user environment
+	// ConfigFilePath holds path to config file
+	ConfigFilePath string
+	// ConfigFileLocations holds default locations to look for a config file
+	ConfigFileLocations []string
+	// cfg pointer to configuration slice
+	cfg *Config
+	// err is a global error variable
+	err error
+	// showVersion, will show version info and exit if true
+	showVersion bool
 )
 
 func init() {
 	// determine current user
-	usr, err := user.Current()
+	/*usr, err := user.Current()
 	if err != nil {
-		log.Fatal("Can not determine current user: ", err)
+		log.Printf("Can not determine current user: ", err)
 	}
+	*/
 	// fill default config locations
 	ConfigFileLocations = []string{
+		"/app/config/config.yml"
 		"/etc/TLSWebserver/config.yml",
 		"/usr/local/etc/TLSWebServer/config.yml",
-		filepath.Join(usr.HomeDir, ".config/TLSWebServer/config.yml"),
+		//filepath.Join(usr.HomeDir, ".config/TLSWebServer/config.yml"),
 		"./config.yml",
 	}
 	// create a new config with default values
 	cfg = NewConfig("")
 
-	flag.StringVar(&ConfigFilePath, "conf", "./config.yml", "path to config file")
+	flag.StringVar(&ConfigFilePath, "conf", os.Getenv("CONFIG"), "path to config file")
 	flag.BoolVar(&showVersion, "version", false, "shows version information and exists")
 	//flag.StringVar(&cfg.HttpAddr, "http", "", "http to https redirector listen address")
 	//flag.StringVar(&cfg.HttpsAddr, "https", ":443", "https listen address")

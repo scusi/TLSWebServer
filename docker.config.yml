@@ -14,11 +14,11 @@ HttpsAddr: :8443
 
 # Path to TLS certificate file in PEM format
 #TLSCertPath: tls/cert.pem
-TLSCertPath: 
+TLSCertPath: /app/config/cert.pem 
 
 # Path to TLS key file in PEM format, without a passphrase.
 #TLSKeyPath: tls/key.pem
-TLSKeyPath:
+TLSKeyPath: /app/config/key.pem
 
 # StaticDir is the path to the web root directory
-StaticDir: www 
+StaticDir: /www 
