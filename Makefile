@@ -1,16 +1,16 @@
 SHELL:=/bin/bash
 GOBIN:=$(GOROOT)/bin
 
-COMMIT := $(shell git rev-parse --short origin/master)
-VERSION := $(shell git tag --points-at origin/master)
-BUILDTIME := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
-BRANCH := $(shell git branch | grep \* | cut -d ' ' -f2)
+# COMMIT := $(shell git rev-parse --short origin/master)
+# VERSION := $(shell git tag --points-at origin/master)
+# BUILDTIME := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
+# BRANCH := $(shell git branch | grep \* | cut -d ' ' -f2)
 
 
-GOLDFLAGS += -X main.Version=$(VERSION)
-GOLDFLAGS += -X main.Commit=$(COMMIT)
-GOLDFLAGS += -X main.Buildtime=$(BUILDTIME)
-GOLDFLAGS += -X main.Branch=$(BRANCH)
+# GOLDFLAGS += -X main.Version=$(VERSION)
+# GOLDFLAGS += -X main.Commit=$(COMMIT)
+# GOLDFLAGS += -X main.Buildtime=$(BUILDTIME)
+# GOLDFLAGS += -X main.Branch=$(BRANCH)
 GOLDFLAGS += -w -s
 GOFLAGS = -ldflags "$(GOLDFLAGS)"
 
