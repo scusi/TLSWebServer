@@ -7,7 +7,10 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'make build'
+        sh '''
+          make build
+          ls -al
+        '''
       }
     }
 
@@ -26,12 +29,24 @@ pipeline {
             branchName = 'prod'
           }
         }
+        script {
+          branchName = BRANCH_NAME
+          if (['master'].contains(branchName)) {
+            branchName = 'prod'
+          }
+        }
         sh """
           mkdir -p dist
           tar -zcvf dist/TLSWebServer.tar.gz TLSWebServer
           aws s3 cp dist/TLSWebServer.tar.gz s3://optimus-deploy/webserver/JenkinsBuilds/${branchName.toUpperCase()}/
         """
       }
+    }
+  }
+
+  post {
+    cleanup {
+      cleanWs()
     }
   }
 }
