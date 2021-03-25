@@ -1,8 +1,8 @@
 SHELL:=/bin/bash
 GOBIN:=$(GOROOT)/bin
 
-COMMIT := $(shell git rev-parse --short origin/test)
-VERSION := $(shell git tag --points-at origin/test)
+COMMIT := $(shell git rev-parse --short origin/master)
+VERSION := $(shell git tag --points-at origin/master)
 BUILDTIME := $(shell date -u '+%Y-%m-%dT%H:%M:%SZ')
 BRANCH := $(shell git branch | grep \* | cut -d ' ' -f2)
 
@@ -25,4 +25,3 @@ run: build
 
 build:
 	$(GOBIN)/go build $(GOFLAGS) .
-
