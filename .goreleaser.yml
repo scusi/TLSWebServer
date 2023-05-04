@@ -32,6 +32,7 @@ builds:
   - CGO_ENABLED=0
 archives:
   - id: "TLSWebServer"
+    allow_different_binary_count: true
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os  }}_{{ .Arch  }}"
     replacements:
       darwin: Darwin
